@@ -55,7 +55,7 @@ def format_datetime(value, format='medium'):
 # route handler for home page
 @app.route('/')
 def index():
-    return render_template('templates/home.html')
+    return render_template('home.html')
 
 
 @app.route('/login')
