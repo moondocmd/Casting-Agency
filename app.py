@@ -53,6 +53,11 @@ def format_datetime(value, format='medium'):
   return babel.dates.format_datetime(date, format)
 
 # ROUTES
+# route handler for home page
+@app.route('/')
+def index():
+	return render_template('templates/home.html')
+
 @app.route('/login')
 def login():
     return auth0.authorize_redirect(redirect_uri='http://localhost:5000/callback')
