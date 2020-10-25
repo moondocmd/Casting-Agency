@@ -43,8 +43,6 @@ if __name__ == '__main__':
 
 
 def format_datetime(value, format='medium'):
-  print("Trying to format date")
-  print(value)
   date = dateutil.parser.parse(value)
   if format == 'full':
       format="EEEE MMMM, d, y 'at' h:mma"
@@ -86,7 +84,6 @@ def dashboard():
 
 @app.route("/authorization/url", methods=["GET"])
 def generate_auth_url():
-  print("getting url")
   url = f'https://full-stack-2020.us.auth0.com/authorize' \
   f'?audience=casting' \
   f'&response_type=token&client_id=' \
@@ -110,8 +107,6 @@ def get_actors(token):
         "age" : actor.age,
         "gender" : actor.gender
       })
-
-    print("Getting Actors ")
     return jsonify({
         "success": True,
         "actors": actors
@@ -122,7 +117,6 @@ def get_actors(token):
 @app.route('/movies', methods=['GET'])
 @requires_auth('get:movies')
 def get_movies(token):
-  print("Getting Movies")
   try:
     movies = []
     for movie in Movie.query.order_by(Movie.id).all():
@@ -176,14 +170,12 @@ def get_movie(token, movie_id):
 @requires_auth('post:actors')
 def new_actor(token):
     try:
-        print("Trying to add")
         body = request.get_json()
         fname = body.get('fname',None)
         lname = body.get('lname',None)
         age = body.get('age', None)
         gender = body.get('gender', None)
         new_actor = Actor(fname=fname, lname=lname, age=age, gender=gender)
-        print(new_actor)
         new_actor.insert()
         return jsonify({
             'success': True,
@@ -191,14 +183,12 @@ def new_actor(token):
             'last-name' : lname
         }), 200
     except Exception:
-        print(Exception)
         abort(422)
 
 @app.route('/movies', methods=['POST'])
 @requires_auth('post:movies')
 def new_movie(token):
     try:
-        print("Trying to add a movie")
         body = request.get_json()
         title = body.get('title',None)
         release = time.strptime(body.get('release'), "%m/%d/%Y")
@@ -210,14 +200,12 @@ def new_movie(token):
             'release date' : strftime("%d %b %Y", release)
         }), 200
     except Exception:
-        print(Exception)
         abort(422)
 
 @app.route('/movies/<int:movie_id>', methods=['PATCH'])
 @requires_auth('patch:movies')
 def update_movie(token, movie_id):
     try:
-        print("LETS TRY AND PATCH AN MOVIE")
         movie = Movie.query.filter_by(id=movie_id).one_or_none()
 
         if(movie is None):
@@ -244,7 +232,6 @@ def update_movie(token, movie_id):
 @requires_auth('patch:actors')
 def update_actor(token, actor_id):
     try:
-        print("LETS TRY AND PATCH AN ACTOR")
         actor = Actor.query.filter_by(id=actor_id).one_or_none()
         if(actor is None):
             abort(404)
@@ -270,13 +257,11 @@ def delete_actor(token, actor_id):
     try:
       actor = Actor.query.get(actor_id)
       actor.delete()
-      print("Actor has been deleted")
       return jsonify({
         'success': True,
         'deleted': actor.id
       }), 200
     except Exception:
-      print (Exception)
       abort(422)
 
 @app.route('/movies/<int:movie_id>', methods=['DELETE'])
@@ -285,13 +270,11 @@ def delete_movie(token, movie_id):
     try:
       movie = Movie.query.get(movie_id)
       movie.delete()
-      print("Movie has been deleted")
       return jsonify({
         'success': True,
         'deleted': movie.id
       }), 200
     except Exception:
-      print (Exception)
       abort(422)
 
 

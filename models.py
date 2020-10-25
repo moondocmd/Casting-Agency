@@ -39,16 +39,13 @@ class Actor(db.Model):
   gender = db.Column(db.String, nullable=False)
 
   '''
-  insert() UPDATE WORDS HERE
+  insert()
   '''
-  def insert(self): #working
-      print("LETS GO AHEAD AND INSERT")
-      print(self)
+  def insert(self): 
       try:
         db.session.add(self)
         db.session.commit()
       except Exception:
-        print(Exception)
         db.session.rollback()
         abort(422)
 
@@ -57,7 +54,6 @@ class Actor(db.Model):
         db.session.delete(self)
         db.session.commit()
       except Exception:
-        print (Exception)
         db.session.rollback()
         abort(422)
       finally:  ### Should I do this elsewhere?
@@ -65,10 +61,8 @@ class Actor(db.Model):
     
   def update(self):
     try:
-      print("ALRIGHT WE GONNA UPDATE!")
       db.session.commit()
     except Exception:
-      print (Exception)
       db.session.rollback()
       abort(422)
 
@@ -92,13 +86,10 @@ class Movie(db.Model):
   #   self.type = type
 
   def insert(self): #working
-    print("LETS GO AHEAD AND INSERT a movie")
     try:
       db.session.add(self)
       db.session.commit()
-      print("ADDED!")
     except Exception:
-      print(Exception)
       db.session.rollback()
       abort(422)
 
@@ -107,7 +98,6 @@ class Movie(db.Model):
       db.session.delete(self)
       db.session.commit()
     except Exception:
-      print (Exception)
       db.session.rollback()
       abort(422)
     finally:  ### Should I do this elsewhere?
@@ -115,10 +105,8 @@ class Movie(db.Model):
 
   def update(self):
     try:
-      print("ALRIGHT WE GONNA UPDATE!")
       db.session.commit()
     except Exception:
-      print (Exception)
       db.session.rollback()
       abort(422)
 

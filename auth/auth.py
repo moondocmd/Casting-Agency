@@ -53,7 +53,6 @@ def get_token_auth_header():
 
 
 def check_permissions(permission, payload):
-    print("CHECKING PERMISSION")
     if 'permissions' not in payload:
         raise AuthError({
             'code': 'invalid_header',
@@ -122,7 +121,6 @@ def verify_decode_jwt(token):
             }, 400)
 
 def requires_auth(permission=''):
-    print("LOOKING FOR SOMETHING")
     def requires_auth_decorator(f):
         @wraps(f)
         def wrapper(*args, **kwargs):
