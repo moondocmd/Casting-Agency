@@ -8,22 +8,22 @@ from datetime import date, datetime
 from flask import Flask, request, abort, jsonify, render_template, session, redirect
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
-
 from models import db_drop_and_create_all, setup_db, Actor, Movie
 from auth.auth import AuthError, requires_auth
 from authlib.integrations.flask_client import OAuth
 
+
 def create_app(test_config=None):
-  # create and configure the app
-  app = Flask(__name__)
-  setup_db(app)
-  CORS(app)
-  # db_drop_and_create_all()
-  return app
+    # create and configure the app
+    app = Flask(__name__)
+    setup_db(app)
+    CORS(app)
+    # db_drop_and_create_all()
+    return app
+
 
 app = create_app()
 app.secret_key = os.urandom(24)
-
 oauth = OAuth(app)
 
 auth0 = oauth.register(
@@ -39,26 +39,29 @@ auth0 = oauth.register(
 )
 
 if __name__ == '__main__':
-  app.run(host='0.0.0.0', port=8080, debug=True)
+    app.run(host='0.0.0.0', port=8080, debug=True)
 
 
 def format_datetime(value, format='medium'):
-  date = dateutil.parser.parse(value)
-  if format == 'full':
-      format="EEEE MMMM, d, y 'at' h:mma"
-  elif format == 'medium':
-      format="EE MM, dd, y h:mma"
-  return babel.dates.format_datetime(date, format)
+    date = dateutil.parser.parse(value)
+    if format == 'full':
+        format = "EEEE MMMM, d, y 'at' h:mma"
+    elif format == 'medium':
+        format = "EE MM, dd, y h:mma"
+    return babel.dates.format_datetime(date, format)
+
 
 # ROUTES
 # route handler for home page
 @app.route('/')
 def index():
-	return render_template('templates/home.html')
+    return render_template('templates/home.html')
+
 
 @app.route('/login')
 def login():
     return auth0.authorize_redirect(redirect_uri='http://localhost:5000/callback')
+
 
 @app.route('/callback')
 def callback_handling():
@@ -76,103 +79,111 @@ def callback_handling():
     }
     return redirect('/dashboard')
 
+
 @app.route('/dashboard')
 def dashboard():
-    return render_template('dashboard.html',
-                           userinfo=session['profile'],
-                           userinfo_pretty=json.dumps(session['jwt_payload'], indent=4))
+    return render_template(
+        'dashboard.html',
+        userinfo=session['profile'],
+        userinfo_pretty=json.dumps(session['jwt_payload'], indent=4)
+        )
+
 
 @app.route("/authorization/url", methods=["GET"])
 def generate_auth_url():
-  url = f'https://full-stack-2020.us.auth0.com/authorize' \
-  f'?audience=casting' \
-  f'&response_type=token&client_id=' \
-  f'sTJG5iVLA8tx8loet75JrKYpTBmWTetY&redirect_uri=' \
-  f'http://localhost:5000/callback'
-  return jsonify({
-  'url': url
-})
+    url = f'https://full-stack-2020.us.auth0.com/authorize' \
+        f'?audience=casting' \
+        f'&response_type=token&client_id=' \
+        f'sTJG5iVLA8tx8loet75JrKYpTBmWTetY&redirect_uri=' \
+        f'http://localhost:5000/callback'
+    return jsonify({
+        'url': url
+    })
 
 
 @app.route('/actors', methods=['GET'])
 @requires_auth('get:actors')
 def get_actors(token):
-  try:
-    actors = []
-    for actor in Actor.query.order_by(Actor.id).all():
-      actors.append({
-        "id" : actor.id,
-        "First Name" : actor.fname,
-        "Last Name" : actor.lname,
-        "age" : actor.age,
-        "gender" : actor.gender
-      })
-    return jsonify({
-        "success": True,
-        "actors": actors
-    }), 200
-  except Exception:
-    abort(404)
+    try:
+        actors = []
+        for actor in Actor.query.order_by(Actor.id).all():
+            actors.append({
+                "id": actor.id,
+                "First Name": actor.fname,
+                "Last Name": actor.lname,
+                "age": actor.age,
+                "gender": actor.gender
+            })
+        return jsonify({
+            "success": True,
+            "actors": actors
+        }), 200
+    except Exception:
+        abort(404)
+
 
 @app.route('/movies', methods=['GET'])
 @requires_auth('get:movies')
 def get_movies(token):
-  try:
-    movies = []
-    for movie in Movie.query.order_by(Movie.id).all():
-      movies.append({
-        "id" : movie.id,
-        "title" : movie.title,
-        "release-date" : movie.release,
-      })
-    return jsonify({
-        "success": True,
-        "movies": movies
-    }), 200
-  except Exception:
-    abort(404)
+    try:
+        movies = []
+        for movie in Movie.query.order_by(Movie.id).all():
+            movies.append({
+                "id": movie.id,
+                "title": movie.title,
+                "release-date": movie.release,
+            })
+        return jsonify({
+            "success": True,
+            "movies": movies
+        }), 200
+    except Exception:
+        abort(404)
+
 
 @app.route('/actors/<int:actor_id>', methods=['GET'])
 @requires_auth('get:actors')
 def get_actor(token, actor_id):
-  try:
-    actor = Actor.query.get(actor_id)
-    if actor is None:
-      abort(404)
-    return jsonify({
-        "success": True,
-        "id" : actor.id,
-        "First Name" : actor.fname,
-        "Last Name" : actor.lname,
-        "age" : actor.age,
-        "gender" : actor.gender
-    }), 200
-  except Exception:
-    abort(404)
+    try:
+        actor = Actor.query.get(actor_id)
+        if actor is None:
+            abort(404)
+        return jsonify({
+            "success": True,
+            "id": actor.id,
+            "First Name": actor.fname,
+            "Last Name": actor.lname,
+            "age": actor.age,
+            "gender": actor.gender
+        }), 200
+    except Exception:
+        abort(404)
+
 
 @app.route('/movies/<int:movie_id>', methods=['GET'])
 @requires_auth('get:movies')
 def get_movie(token, movie_id):
-  try:
-    movie = Movie.query.get(movie_id)
-    if movie is None:
-      abort(404)
-    return jsonify({
-        "success": True,
-        "id" : movie.id,
-        "title" : movie.title,
-        "release-date" : movie.release
-    }), 200
-  except Exception:
-    abort(404)
+    try:
+        movie = Movie.query.get(movie_id)
+        if movie is None:
+            abort(404)
+        return jsonify({
+            "success": True,
+            "id": movie.id,
+            "title": movie.title,
+            "release-date": movie.release
+        }), 200
+    except Exception:
+        abort(404)
+
 
 @app.route('/actors', methods=['POST'])
 @requires_auth('post:actors')
 def new_actor(token):
     try:
         body = request.get_json()
-        fname = body.get('fname',None)
-        lname = body.get('lname',None)
+        fname = body.get('fname', None)
+        lname = body.get('lname', None)
         age = body.get('age', None)
         gender = body.get('gender', None)
         new_actor = Actor(fname=fname, lname=lname, age=age, gender=gender)
@@ -180,27 +191,29 @@ def new_actor(token):
         return jsonify({
             'success': True,
             'first-name': fname,
-            'last-name' : lname
+            'last-name': lname
         }), 200
     except Exception:
         abort(422)
+
 
 @app.route('/movies', methods=['POST'])
 @requires_auth('post:movies')
 def new_movie(token):
     try:
         body = request.get_json()
-        title = body.get('title',None)
+        title = body.get('title', None)
         release = time.strptime(body.get('release'), "%m/%d/%Y")
         new_movie = Movie(title=title, release=strftime("%d %b %Y", release))
         new_movie.insert()
         return jsonify({
             'success': True,
             'title': title,
-            'release date' : strftime("%d %b %Y", release)
+            'release date': strftime("%d %b %Y", release)
         }), 200
     except Exception:
         abort(422)
+
 
 @app.route('/movies/<int:movie_id>', methods=['PATCH'])
 @requires_auth('patch:movies')
@@ -214,14 +227,14 @@ def update_movie(token, movie_id):
         body = request.get_json()
         movie.title = body.get('title', movie.title)
         if('release' in body):
-          release = time.strptime(body.get('release'), "%m/%d/%Y")
-          movie.release = strftime("%d %b %Y", release)
+            release = time.strptime(body.get('release'), "%m/%d/%Y")
+            movie.release = strftime("%d %b %Y", release)
 
         movie.update()
 
         return jsonify({
-          'success': True,
-          'Updated Movie ID': movie.id
+            'success': True,
+            'Updated Movie ID': movie.id
         }), 200
 
     except Exception:
@@ -255,45 +268,47 @@ def update_actor(token, actor_id):
 @requires_auth('delete:actors')
 def delete_actor(token, actor_id):
     try:
-      actor = Actor.query.get(actor_id)
-      actor.delete()
-      return jsonify({
-        'success': True,
-        'deleted': actor.id
-      }), 200
+        actor = Actor.query.get(actor_id)
+        actor.delete()
+        return jsonify({
+            'success': True,
+            'deleted': actor.id
+        }), 200
     except Exception:
-      abort(422)
+        abort(422)
+
 
 @app.route('/movies/<int:movie_id>', methods=['DELETE'])
 @requires_auth('delete:movies')
 def delete_movie(token, movie_id):
     try:
-      movie = Movie.query.get(movie_id)
-      movie.delete()
-      return jsonify({
-        'success': True,
-        'deleted': movie.id
-      }), 200
+        movie = Movie.query.get(movie_id)
+        movie.delete()
+        return jsonify({
+            'success': True,
+            'deleted': movie.id
+        }), 200
     except Exception:
-      abort(422)
+        abort(422)
 
 
 @app.errorhandler(422)
 def unprocessable(error):
-  return jsonify({
-    "success": False,
-    "error": 422,
-    "message": "unprocessable"
-  }), 422
+    return jsonify({
+        "success": False,
+        "error": 422,
+        "message": "unprocessable"
+    }), 422
 
 
 @app.errorhandler(404)
 def unprocessable(error):
-  return jsonify({
-    "success": False,
-    "error": 404,
-    "message": "Resource not found"
-  }), 404
+    return jsonify({
+        "success": False,
+        "error": 404,
+        "message": "Resource not found"
+    }), 404
+
 
 @app.errorhandler(401)
 def bad_request(error):
@@ -306,8 +321,8 @@ def bad_request(error):
 
 @app.errorhandler(AuthError)
 def auth_error(ex):
-  return jsonify({
-    "success": False,
-    "error": ex.status_code,
-    "message": ex.error['description']
-  }), ex.status_code
+    return jsonify({
+        "success": False,
+        "error": ex.status_code,
+        "message": ex.error['description']
+    }), ex.status_code
