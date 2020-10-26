@@ -1,5 +1,3 @@
-# Casting-Agency
-Capstone project for Udacity Full Stack Web Developer Nanodegree
 # Capstone Project - Casting Agency
 
 This is the capstone project for the Udacity Full Stack Nanodegree program. 
